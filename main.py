@@ -85,14 +85,13 @@ async def main():
         if not os.path.exists(FLAGS.archival_storage_sqldb):
             print(f"File {FLAGS.archival_storage_sqldb} does not exist")
             return
-        # Ingest data from file into archival storage
         else:
-            print(f"Database found! Loading database into archival memory")
+            print("Database found! Loading database into archival memory")
             data_list = utils.read_database_as_list(FLAGS.archival_storage_sqldb)
             user_message = f"Your archival memory has been loaded with a SQL database called {data_list[0]}, which contains schema {data_list[1]}. Remember to refer to this first while answering any user questions!"
             for row in data_list:
                 await memgpt_agent.persistence_manager.archival_memory.insert(row)
-            print(f"Database loaded into archival memory.")
+            print("Database loaded into archival memory.")
 
     # auto-exit for 
     if "GITHUB_ACTIONS" in os.environ:
@@ -111,7 +110,7 @@ async def main():
             clear_line()
 
             if user_input.startswith('!'):
-                print(f"Commands for CLI begin with '/' not '!'")
+                print("Commands for CLI begin with '/' not '!'")
                 continue
 
             if user_input == "":
@@ -187,14 +186,11 @@ async def main():
                         except Exception as e:
                             print(f"Loading {filename} failed with: {e}")
                     else:
-                        # Load the latest file 
-                        print(f"/load warning: no checkpoint specified, loading most recent checkpoint instead")
-                        json_files = glob.glob("saved_state/*.json")  # This will list all .json files in the current directory.
-        
-                        # Check if there are any json files.
-                        if not json_files:
-                            print(f"/load error: no .json checkpoint files found")
-                        else:
+                        # Load the latest file
+                        print(
+                            "/load warning: no checkpoint specified, loading most recent checkpoint instead"
+                        )
+                        if json_files := glob.glob("saved_state/*.json"):
                             # Sort files based on modified timestamp, with the latest file being the first.
                             filename = max(json_files, key=os.path.getmtime)
                             try:
@@ -203,6 +199,8 @@ async def main():
                             except Exception as e:
                                 print(f"Loading {filename} failed with: {e}")
 
+                        else:
+                            print("/load error: no .json checkpoint files found")
                     # need to load persistence manager too
                     filename = filename.replace('.json', '.persistence.pickle')
                     try:
@@ -248,7 +246,6 @@ async def main():
                     memgpt_agent.messages = memgpt_agent.messages[:-amount]
                     continue
 
-                # No skip options
                 elif user_input.lower() == "/wipe":
                     memgpt_agent = agent.AgentAsync(interface)
                     user_message = None
